@@ -67,14 +67,3 @@ output: {
 },
 ...
 ```
-
-## 页面截图
-![./screenshot/turntable.png](./screenshot/turntable.png)
-
-## 项目预览
-1. vue demo：[vue](./dist/index.html)
-2. 原生 js demo: [js](./demo/index.html)
-
-    用 css 布局实现的转盘效果，js 实现的抽奖效果。目的是练习自己的基本功 ^_^
-
-3. react demo: [react](./dist/index.html)
