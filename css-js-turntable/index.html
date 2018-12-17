@@ -1,0 +1,350 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>简单转盘</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      html, body {
+        height: 100%;
+      }
+      ul {
+        list-style: none;
+      }
+      
+      @keyframes white-to-yellow {
+        0% {
+          background: #fff;
+        }
+        100% {
+          background: #d7a945;
+        }
+      }
+      @keyframes heartbeat {
+        0% {
+          transform: scale(1);
+        }
+        25% {
+          transform: scale(0.8);
+        }
+        50% {
+          transform: scale(1.2);
+        }
+        75% {
+          transform: scale(0.9);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .turntable-wrap {
+        position: relative;
+        overflow: hidden;
+        margin: 50px;
+        width: 340px;
+        height: 340px;
+        border: 7px solid #b2a98d;
+        border-radius: 50%;  
+        box-shadow: 0 0 20px #b2a98d;
+      }
+      .turntable-wrap .light {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #e0ddd1;
+        animation: rotate 5s linear infinite;
+      }
+      .turntable-wrap .light span {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        width: 10px;
+        height: 100%;
+        border-radius: 50%;
+        transform-origin: center center;
+      }
+      .turntable-wrap .light span:before {
+        content: '';
+        position: absolute;
+        top: 5px;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .turntable-wrap .light span:nth-of-type(even):before {
+        background: #fff;
+        animation: white-to-yellow 1s linear infinite;
+      }
+      .turntable-wrap .light span:nth-of-type(odd):before {
+        background: #d7a945;
+        animation: white-to-yellow 1s linear reverse infinite;
+      }
+
+      .turntable-wrap .turntable {
+        position: absolute;
+        margin: 20px;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: #fff;
+      }
+      .turntable-wrap .turntable .bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        border: 1px solid #dfd8be;
+        border-radius: 50%;
+        transform: rotate(90deg);
+      }
+      .turntable-wrap .turntable .bg li {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        width: 1px;
+        height: 100%;
+        background: #dfd8be;
+        transform-origin: center center;
+      }
+
+      .turntable-wrap .turntable .gift {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform: rotate(45deg);
+      }
+      .turntable-wrap .turntable .gift li {
+        position: absolute;
+        top: 5%;
+        left: 5%;
+        width: 45%;
+        height: 45%;
+        transform-origin: right bottom;
+      }
+      .turntable-wrap .turntable .gift li span {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: block;
+        width: 50px;
+        height: 70px;
+        margin: auto;
+        background: yellow;
+        transform: rotate(-45deg);
+        text-align: center;
+        line-height: 80px;
+        border-radius: 5px;
+        background: #f23c3c;
+        color: #fff;
+        font-size: 24px;
+      }
+      .turntable-wrap .turntable .gift li:not(.no-gift) span:before {
+        content: '';
+        position: absolute;
+        top: 15px;
+        left: 0;
+        width: 50px;
+        height: 1px;
+        background: #fff;
+      }
+      .turntable-wrap .turntable .gift li.no-gift span {
+        background: #fff;
+        line-height: 70px;
+        color: #bfa74f;
+        font-size: 12px;
+      }
+
+      .turntable-wrap .pointer {
+        box-sizing: border-box;
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        margin: -23px auto;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: #fff;
+        border: 5px solid #fff;
+        box-shadow: 0 0 0 5px #b9a046;
+        text-align: center;
+        line-height: 16px;
+        color: #b9a046;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .turntable-wrap .pointer:before {
+        content: '';
+        position: absolute;
+        top: -58px;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        width: 0;
+        border-style: solid;
+        border-color: transparent transparent #b9a046 transparent;
+        border-width: 25px 10px 25px 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="turntable-wrap">
+      <div class="light" id="turntable_light"></div>
+      <div class="turntable" id="turntable">
+        <ul class="bg" id="turntable_bg"></ul>
+        <ul class="gift" id="turntable_gift"></ul>
+      </div>
+      <div class="pointer disabled" id="turntable_pointer">点击抽奖</div>
+    </div>
+
+    <script> 
+      // 单例模式，转盘唯一，用对象字面量方式表示
+      let turntable = {
+        itemNum: 6, // 转盘平均分几块
+        
+        lightNum: 18, // 转盘上的灯
+        light: null, // 转盘旋转灯容器
+        
+        turntable: null, // 转盘
+
+        bg: null, // 转盘背景
+
+        gift: null, // 转盘上的中奖结果图
+        
+        pointer: null, // 转盘指针
+        
+        lottery: [], // 中奖数据
+
+        typeMap: {1: '¥', 2: '谢谢参与'},
+        typeClassMap: {1: '', 2: 'no-gift'},
+        
+        isGoing: false, // 游戏是否开始
+
+        init () {
+          if (!this.lottery.length) {
+            this.pointer.style.display = 'none';
+            throw new Error('请设置中奖结果数据');
+          }
+
+          // 初始化灯
+          let lightFragment = document.createDocumentFragment();
+          for (let i = 0; i < this.lightNum; i++) {
+            let lightItem = document.createElement('span');
+            let deg = (360 / this.lightNum) * i
+            lightItem.style.transform = `rotate(${deg}deg)`;
+            lightFragment.appendChild(lightItem);
+          }
+          this.light.appendChild(lightFragment);
+
+          // 初始化转盘背景、转盘上的中奖图（用不同背景色代替）
+          let bgFragment = document.createDocumentFragment();
+          let bgItemWidth = this.bg.offsetWidth / this.num;
+          let giftFragment = document.createDocumentFragment();
+          for (let i = 0; i < this.itemNum; i++) {
+            let bgItem = document.createElement('li');
+            let deg = (360 / this.itemNum) * i
+            bgItem.style.transform = `rotate(${deg}deg)`;
+            bgFragment.appendChild(bgItem);
+
+            let giftItem = document.createElement('li');
+            giftItem.style.transform = `rotate(${deg}deg)`;
+            giftItem.className = this.typeClassMap[this.lottery[i].type];
+            let span = document.createElement('span');
+            span.innerHTML = this.typeMap[this.lottery[i].type];
+            giftItem.appendChild(span);
+            giftFragment.appendChild(giftItem)
+          }
+          this.bg.appendChild(bgFragment);
+          this.gift.appendChild(giftFragment);
+
+          // 给点击抽奖按钮添加点击事件
+          this.pointer.onclick = this.gameStart.bind(this)
+        },
+
+        gameStart () {
+          if (this.isGoing) {
+            return
+          }
+          this.isGoing = true;
+
+          // 1. 随机中奖结果
+          // 从1-100之间得到一个随机数，看这个随机数在中奖设置的范围，得到最终中奖的项
+          let randomRate = ~~(Math.random() * 100) // ~~ == Math.floor()
+          // 设置中奖数据的概率范围
+          let num = 0
+          this.lottery.forEach(item => {
+            item.min = num;
+            num += item.rate;
+            item.max = num;
+          })
+          // 根据随机数，得到中奖结果
+          let res = this.lottery.filter(item => {
+            return randomRate >= item.min && randomRate < item.max;
+          })[0];
+          // 这儿可以根据实际情况，可重置中奖结果
+          
+          // 2. 计算旋转角度, 需要多转5圈，达转1圈用时1s, 到旋转的效果
+          let rotateItemDeg = (res.location - 1) * (360 / this.lottery.length); // 每个item旋转角度, 第一个不用旋转
+          let rotate = rotateItemDeg + 5 * 360;
+          let rotateSpeed = (rotateItemDeg / 360 * 1 + 5).toFixed(2);
+          // 重置转盘样式
+          this.turntable.removeAttribute('style');
+          // 保证下一次旋转动画生效
+          setTimeout(() => {
+            this.turntable.style.transform = `rotate(${rotate}deg)`;
+            this.turntable.style.transition = `transform ${rotateSpeed}s ease-out`;
+          }, 10)
+
+          // 3. 动画结束，显示中奖结果，中奖结果如何显示，视实际情况而定
+          setTimeout(() => {
+            this.isGoing = false;
+            console.log('中奖结果：', randomRate, res, this.typeMap[res.type]);
+          }, rotateSpeed * 1000);
+        }
+      }
+      
+      let lottery = [
+        {
+          location: 1, // 位置
+          type: 1, // 中奖
+          rate: 30,
+        },
+        { 
+          location: 2,
+          type: 2, // 未中奖
+          rate: 20
+        },
+        { location: 3, type: 1, rate: 10 },
+        { location: 4, type: 2, rate: 20 },
+        { location: 5, type: 1, rate: 10 },
+        { location: 6, type: 2, rate: 10 }
+      ];
+
+      turntable.turntable = document.querySelector('#turntable');
+      turntable.light = document.querySelector('#turntable_light');
+      turntable.bg = document.querySelector('#turntable_bg');
+      turntable.gift = document.querySelector('#turntable_gift');
+      turntable.pointer = document.querySelector('#turntable_pointer');
+      turntable.lottery = lottery;
+      turntable.init();
+    </script>
+  </body>
+</html>

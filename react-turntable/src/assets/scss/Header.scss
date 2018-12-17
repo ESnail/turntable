@@ -1,0 +1,24 @@
+.header-wrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 600px;
+  background: url('../img/header-bg.png') no-repeat 100% 100%;
+  background-size: cover;
+  .logo {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    display: block;
+    width: 190px;
+    height: 95px;
+  }
+  .con {
+    margin: 0 auto;
+    width: 800px;
+    height: 100%;
+    background: url('../img/header-title.png') no-repeat 100% 100%;
+    background-size: cover;
+  }
+}
