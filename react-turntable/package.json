@@ -44,7 +44,7 @@
     "px2rem-loader": "^0.1.9",
     "react": "^16.6.3",
     "react-app-polyfill": "^0.1.3",
-    "react-dev-utils": "^6.1.1",
+    "react-dev-utils": "^11.0.4",
     "react-dom": "^16.6.3",
     "react-transition-group": "^2.5.1",
     "resolve": "1.8.1",
